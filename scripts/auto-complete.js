@@ -16,9 +16,9 @@
     function getFromUrl(inputForm, config, $auto) {
         var currentInput = String(inputForm.val());
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: config.url,
-            data: currentInput,
+            data: '111',
             dataType: "json",
             success: function(data) {
                 resultShow(data, $auto);
@@ -51,19 +51,22 @@
             tableBody += '<div class="u-autorow">' + data[ii] + '</div>'
         }
         tableBody += '</div>';
-        $auto.html(tableBody);
+        $auto.append(tableBody);
         $auto.show();
     }
     // 功能键作用
     function functionKeyUse(inputForm, inputText, $auto) {
         if ($auto.is(':hidden')) return;
+        $auto.unbind('mouseover');
         switch (event.keyCode) {
             case 40: //向下键
-                var $next = $auto.find('.u-autocomplete-selected');
+                var $next = $('.u-autocomplete-selected');
+
                 if ($next.length <= 0) { //没有选中行时，选中第一行
-                    $next = $auto.find('div.u-autorow:first');
+                    $next = $('div.u-autorow:first').addClass('u-autocomplete-selected');
                 } else {
-                    $next = $next.next();
+                    $next.removeClass('u-autocomplete-selected');
+                    $next = $next.next().addClass('u-autocomplete-selected');
                 }
                 $('div.u-autorow').removeClass('u-autocomplete-selected');
 
@@ -77,7 +80,8 @@
                 }
                 break;
             case 38: //向上键
-                var $previous = $auto.find('.u-autocomplete-selected');
+                var $previous = $('.u-autocomplete-selected');
+                console.log($previous.prev().text());
                 if ($previous.length <= 0) { //没有选中行时，选中最后一行行
                     $previous = $auto.find('div.u-autorow:last');
                 } else {
@@ -99,21 +103,6 @@
                 break;
         }
     }
-    // 鼠标移动
-    function mouseChoose(inputForm, inputText, $auto) {
-        if ($auto.is(':hidden')) return;
-        $('div.u-autorow').on('mouseover', function() {
-            inputForm.focus();
-            $('div.u-autorow').removeClass('u-autocomplete-selected');
-            $tr = $(this)
-            $tr.addClass('u-autocomplete-selected');
-        });
-        $('div.u-autorow').on('click', function() {
-            $tr = $(this);
-            inputForm.val($tr.text());
-            $auto.hide();
-        });
-    }
     $.fn.extend({
         autoComplete: function(params) {
             // 设置补足框位置
@@ -125,19 +114,18 @@
             // 配置参数
             var config = {
                 url: null,
-                // 可选,ajax的url地址
-                ajaxMethod: 'GET',
                 // 可选,ajax的method
                 data: null
-                    // 穿参格式[{title:11111,result:['111222','1111333']},{title:222222,result:['222222','222333']}]
+                    // 穿参格式[{key:'',value:''}]
                     // url优先于data
             };
             $.extend(config, params);
             var functionalKeyArray = [40, 38, 13, 27];
             //键盘上功能键键值数组
             // 补全框设定
-            $('body').append('<div class="m-autocomplete-area"></div>');
-            var $auto = $('.m-autocomplete-area');
+
+            var $auto = $('<div class="m-autocomplete-area"></div>');
+            $(document.body).append($auto);
             $auto.css({
                 'width': inputWidth - 2,
                 'top': inputHeight + inputTop,
@@ -162,12 +150,22 @@
                         break;
                     }
                 }
-                if (!isFunctionalKey) {
-                    mouseChoose(inputForm, currentInput, $auto);
-                } else {
+                if (!isFunctionalKey) {} else {
                     functionKeyUse(inputForm, currentInput, $auto);
                 }
             })
+            $auto.on('mouseover', function(event) {
+                console.log('over');
+                inputForm.focus();
+                $('div').removeClass('u-autocomplete-selected');
+                $tr = $(event.target)
+                $tr.addClass('u-autocomplete-selected');
+            });
+            $auto.on('click', function(event) {
+                $tr = $(event.target);
+                inputForm.val($tr.text());
+                $auto.hide();
+            });
         }
     });
 

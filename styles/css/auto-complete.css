@@ -1,10 +1,11 @@
 .m-autocomplete-area {
   display: none;
   background-color: #FFFFFF;
+  color: #000000;
   border: 1px solid #cccccc;
   border-radius: 4px;
   position: absolute;
-  z-index: 9999 !important;
+  z-index: 9999;
   max-height: 220px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -26,5 +27,5 @@
   white-space: nowrap; }
 
 .u-autocomplete-selected {
-  background: none repeat scroll 0 0 #eeeeee !important;
-  color: #337ab7 !important; }
+  background: none repeat scroll 0 0 #eeeeee;
+  color: #337ab7; }

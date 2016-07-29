@@ -7,10 +7,11 @@ $inputLeftPadding:12px;
 .m-autocomplete-area {
     display: none;
     background-color: $backgroundColor;
+    color: #000000;
     border: $borderSize solid $borderColor;
     border-radius: 4px;
     position: absolute;
-    z-index: 9999 !important;
+    z-index: 9999;
     max-height: 220px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -35,6 +36,6 @@ $inputLeftPadding:12px;
 }
 
 .u-autocomplete-selected {
-    background: none repeat scroll 0 0 $selectColor !important;
-    color: $selectFontColor !important;
+    background: none repeat scroll 0 0 $selectColor;
+    color: $selectFontColor;
 }
