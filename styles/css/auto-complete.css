@@ -1,0 +1,30 @@
+.m-autocomplete-area {
+  display: none;
+  background-color: #FFFFFF;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  position: absolute;
+  z-index: 9999 !important;
+  max-height: 220px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  text-align: left;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175); }
+
+.m-autotable {
+  border-collapse: collapse;
+  border-spacing: 0;
+  background: none repeat scroll 0 0 #FFFFFF;
+  width: 100%;
+  cursor: default;
+  padding: 5px 0; }
+
+.u-autorow {
+  background: none repeat scroll 0 0 #FFFFFF;
+  line-height: 20px;
+  padding: 3px 12px;
+  white-space: nowrap; }
+
+.u-autocomplete-selected {
+  background: none repeat scroll 0 0 #eeeeee !important;
+  color: #337ab7 !important; }
