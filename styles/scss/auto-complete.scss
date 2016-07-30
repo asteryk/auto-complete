@@ -2,7 +2,7 @@ $autoCompleteBackgroundColor:#FFFFFF;
 $autoCompleteFontColor:#000000;
 $autoCompleteBoxShadow:0 6px 12px rgba(0, 0, 0, .175);
 // 主体样式
-$autoCompleteBorder:1px soild #cccccc;
+$autoCompleteBorder:1px solid #cccccc;
 // 主体边框样式
 $autoCompleteMaxHeight:220px;
 // 出现滚动条的最大高度
@@ -29,7 +29,7 @@ $autoCompleteRowPadding:3px 12px;
     box-shadow: $autoCompleteBoxShadow;
 }
 
-.js-autotable {
+.js-autocontainer {
     border-collapse: collapse;
     border-spacing: 0;
     background: $autoCompleteBackgroundColor;

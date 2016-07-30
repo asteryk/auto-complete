@@ -35,18 +35,48 @@
 <body>
     <div class="g-container">
         <p>autoComplete组件</p>
-        <form action="" method="post" name="searchform" class="m-searchform">
+        <div class="m-searchform">
             <input type="text" value="" class="u-demoinput" />
-        </form>
+        </div>
     </div>
     <script>
         $('.u-demoinput').autoComplete({
-            url: 'test/test.json',
+            // url: 'test/test.json',
             data: [{
-                '163': ['111222', '1111333']
+                key: "1",
+                val: "overwatchmaster"
             }, {
-                'mail': ['222222', '222333']
-            }]
+                key: "2",
+                val: "overwatch wiki"
+            }, {
+                key: "3",
+                val: "overwatch mac"
+            }, {
+                key: "4",
+                val: "overwatchmax"
+            }, {
+                key: "5",
+                val: "overwatch max+"
+            }, {
+                key: "6",
+                val: "overwatch同人"
+            }, {
+                key: "7",
+                val: "overwatch d.va"
+            }, {
+                key: "8",
+                val: "overwatch insallation"
+            }, {
+                key: "9",
+                val: "overwatch hack"
+            }, {
+                key: "10",
+                val: "overwatch壁纸"
+            }],
+            valuename: 'val',
+            callback: function(res) {
+                console.log(res)
+            }
         });
     </script>
 </body>

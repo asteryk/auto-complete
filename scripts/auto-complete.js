@@ -8,59 +8,64 @@
  * ajaxMethod: 'GET',
  * 可选,ajax的method,默认GET
  * data: null
- * 穿参格式[{'163':['111222','1111333']},{'mail':['222222','222333']}]
+ * 穿参格式[{'id':'1',name:'sweetyx'},{'id':'2',name:'lyk'}]
  * url优先于data
  */
 (function($) {
-    // ajax
-    function getFromUrl($inputEle, config, $autoComplete) {
-        var currentInput = String($inputEle.val());
-        $.ajax({
-            type: "POST",
-            url: config.url,
-            data: { keyword: currentInput },
-            dataType: "json",
-            success: function(data) {
-                resultShow(data, $autoComplete);
-            },
-            error: function() {
-                console.log('获取补全信息失败');
-            }
-        });
+    function filterData(currentInput, config, $autoComplete) {
+        var defer = $.Deferred();
+        if (config.url) {
+            config.keyname = 'key';
+            config.valuename = 'word';
+            $.ajax({
+                type: "POST",
+                url: config.url,
+                data: { keyword: currentInput },
+                dataType: "json",
+                success: function(data) {
+                    defer.resolve(associateData(currentInput, data, config.valuename));
+                },
+                error: function() {
+                    console.log('获取补全信息失败');
+                }
+            });
+        } else {
+            defer.resolve(associateData(currentInput, config.data, config.valuename));
+        };
+        return defer;
     }
-    // 本地数据
-    function getFromLocal(inputText, data, $autoComplete) {
-        if (data == null || data.length <= 0) {
+    // 数据联想模块
+    function associateData(keyword, data, valueName) {
+        var list = [];
+        if (keyword == null || keyword == "") {
             return;
         }
-        var flag = false;
-        for (var i = 0; i < data.length; i++) {
-            for (var key in data[i]) {
-                if (inputText === String(key)) {
-                    resultShow(data[i][key], $autoComplete);
-                    flag = true;
+        if (data != null && $.isArray(data)) {
+            for (var i = 0; i < data.length; i++) {
+                if (data[i][valueName].indexOf(keyword) > -1) {
+                    list.push(data[i]);
                 }
             }
         }
-        if (flag) {
-            flag = false;
-        } else {
-            $autoComplete.hide();
-        }
-
+        return list;
+    }
+    // 回调
+    function callbackStack(config, item) {
+        var callbakFunc = config.callback;
+        callbakFunc(item);
     }
     // 显示下拉补全
-    function resultShow(data, $autoComplete) {
+    function resultShow(data, $autoComplete, config) {
         // [data]'s type array
         if (data == null || data.length <= 0) {
             return;
         }
-        var tableBody = '<div class="js-autotable">';;
+        var container = '<div class="js-autocontainer">';;
         for (var ii = 0; ii < data.length; ii++) {
-            tableBody += '<div class="js-autorow">' + data[ii] + '</div>'
+            container += '<div class="js-autorow" item-key="' + data[ii][config.keyname] + '">' + data[ii][config.valuename] + '</div>'
         }
-        tableBody += '</div>';
-        $autoComplete.html(tableBody);
+        container += '</div>';
+        $autoComplete.html(container);
         $autoComplete.show();
     }
     // 滚动条
@@ -88,16 +93,15 @@
 
         switch (event.keyCode) {
             case 40: //向下键
-                var $next = $('.js-autocomplete-selected');
+                var $next = $autoComplete.find('.js-autocomplete-selected');
 
                 if ($next.length <= 0) { //没有选中行时，选中第一行
-                    $next = $('div.js-autorow:first').addClass('js-autocomplete-selected');
+                    $next = $autoComplete.find('.js-autorow:first');
                     $autoComplete.scrollTop(0);
                 } else {
-                    $next.removeClass('js-autocomplete-selected');
-                    $next = $next.next().addClass('js-autocomplete-selected');
+                    $next = $next.next();
                 }
-                $('div.js-autorow').removeClass('js-autocomplete-selected');
+                $('.js-autorow').removeClass('js-autocomplete-selected');
 
                 if ($next.length > 0) { //有下一行时（不是最后一行）
                     $next.addClass("js-autocomplete-selected"); //选中的行加背景
@@ -108,9 +112,9 @@
                 }
                 break;
             case 38: //向上键
-                var $previous = $('.js-autocomplete-selected');
+                var $previous = $autoComplete.find('.js-autocomplete-selected');
                 if ($previous.length <= 0) { //没有选中行时，选中最后一行行
-                    $previous = $autoComplete.find('div.js-autorow:last');
+                    $previous = $autoComplete.find('.js-autorow:last');
                     $autoComplete.scrollTop($autoComplete[0].scrollHeight);
                 } else {
                     $previous = $previous.prev();
@@ -126,6 +130,12 @@
                 }
                 break;
             case 13: //回车隐藏下拉框
+                var $choose = $autoComplete.find('.js-autocomplete-selected');
+                var item = {
+                    'hisKey': $choose.attr('item-key'),
+                    'hisVal': $choose.text()
+                }
+                callbackStack($choose);
             case 27: //ESC键隐藏下拉框
                 $autoComplete.hide();
                 break;
@@ -143,9 +153,12 @@
             var config = {
                 url: null,
                 // 可选,ajax的method
-                data: null
-                    // 穿参格式[{'163':['111222','1111333']},{'mail':['222222','222333']}]
-                    // url优先于data
+                data: null,
+                // 穿参格式[{'163':['111222','1111333']},{'mail':['222222','222333']}]
+                // url优先于data
+                keyname: 'key',
+                valuename: 'value',
+                callback: function(res) {}
             };
             $.extend(config, params);
 
@@ -164,15 +177,18 @@
             // 输入框事件，适配IE8
             $inputEle.on('input propertychange', function() {
                 var currentInput = String($inputEle.val());
-                if (config.url) {
-                    getFromUrl($inputEle, config, $autoComplete);
-                } else {
-                    getFromLocal(currentInput, config.data, $autoComplete);
-                }
+                $autoComplete.hide();
+                filterData(currentInput, config, $autoComplete).then(function(list) {
+                    resultShow(list, $autoComplete, config);
+                    console.log(list);
+                }, function(params) {
+                    console.log(params);
+                });
             });
             //按下的键是否是功能键
             var isFunctionalKey = false;
             $inputEle.on('keyup', function(event) {
+                event.preventDefault();
                 var currentInput = String($inputEle.val());
                 var keyCode = event.keyCode;
                 for (var i = 0; i < functionalKeyArray.length; i++) {
@@ -194,8 +210,8 @@
                 } else {
                     $inputEle.focus();
                     $('div').removeClass('js-autocomplete-selected');
-                    $tr = $(this)
-                    $tr.addClass('js-autocomplete-selected');
+                    $autoCompleteRow = $(this)
+                    $autoCompleteRow.addClass('js-autocomplete-selected');
                 }
 
 
@@ -204,12 +220,12 @@
                 if (isFunctionalKey) {
                     isFunctionalKey = false;
                 } else {
-                    $tr = $(this);
-                    $inputEle.val($tr.text());
+                    $autoCompleteRow = $(this);
+                    $inputEle.val($autoCompleteRow.text());
                     $autoComplete.hide();
                 }
             });
         }
     });
 
-})(jQuery)
+})(jQuery || $);
