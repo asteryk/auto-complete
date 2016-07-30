@@ -4,7 +4,7 @@ $borderColor:#cccccc;
 $selectColor:rgb(238, 238, 238);
 $selectFontColor:rgb(51, 122, 183);
 $inputLeftPadding:12px;
-.m-autocomplete-area {
+.js-autocomplete-area {
     display: none;
     background-color: $backgroundColor;
     color: #000000;
@@ -19,7 +19,7 @@ $inputLeftPadding:12px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
 }
 
-.m-autotable {
+.js-autotable {
     border-collapse: collapse;
     border-spacing: 0;
     background: none repeat scroll 0 0 $backgroundColor;
@@ -28,14 +28,14 @@ $inputLeftPadding:12px;
     padding: 5px 0;
 }
 
-.u-autorow {
+.js-autorow {
     background: none repeat scroll 0 0 $backgroundColor;
     line-height: 20px;
     padding: 3px $inputLeftPadding;
     white-space: nowrap;
 }
 
-.u-autocomplete-selected {
+.js-autocomplete-selected {
     background: none repeat scroll 0 0 $selectColor;
     color: $selectFontColor;
 }
