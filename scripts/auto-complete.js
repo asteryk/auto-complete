@@ -28,7 +28,7 @@
             }
         });
     }
-
+    // 本地数据
     function getFromLocal(inputText, data, $autoComplete) {
         if (data == null || data.length <= 0) {
             return;
@@ -144,14 +144,15 @@
                 url: null,
                 // 可选,ajax的method
                 data: null
-                    // 穿参格式[{key:'',value:''}]
+                    // 穿参格式[{'163':['111222','1111333']},{'mail':['222222','222333']}]
                     // url优先于data
             };
             $.extend(config, params);
-            var functionalKeyArray = [40, 38, 13, 27];
-            //键盘上功能键键值数组
-            // 补全框设定
 
+            //键盘上功能键键值数组
+            var functionalKeyArray = [40, 38, 13, 27];
+
+            // 补全框设定
             var $autoComplete = $('<div class="js-autocomplete-area"></div>');
             $(document.body).append($autoComplete);
             $autoComplete.css({
@@ -159,7 +160,8 @@
                 'top': inputHeight + inputTop,
                 'left': inputLeft
             });
-            // 适配IE8
+
+            // 输入框事件，适配IE8
             $inputEle.on('input propertychange', function() {
                 var currentInput = String($inputEle.val());
                 if (config.url) {
@@ -168,7 +170,8 @@
                     getFromLocal(currentInput, config.data, $autoComplete);
                 }
             });
-            var isFunctionalKey = false; //按下的键是否是功能键
+            //按下的键是否是功能键
+            var isFunctionalKey = false;
             $inputEle.on('keyup', function(event) {
                 var currentInput = String($inputEle.val());
                 var keyCode = event.keyCode;
@@ -183,23 +186,25 @@
                 }
 
             })
-            $autoComplete.on('mouseover', function(event) {
+
+            // 鼠标事件
+            $autoComplete.on('mouseover', 'div.js-autorow', function() {
                 if (isFunctionalKey) {
                     isFunctionalKey = false;
                 } else {
                     $inputEle.focus();
                     $('div').removeClass('js-autocomplete-selected');
-                    $tr = $(event.target)
+                    $tr = $(this)
                     $tr.addClass('js-autocomplete-selected');
                 }
 
 
             });
-            $autoComplete.on('click', function(event) {
+            $autoComplete.on('click', 'div.js-autorow', function() {
                 if (isFunctionalKey) {
                     isFunctionalKey = false;
                 } else {
-                    $tr = $(event.target);
+                    $tr = $(this);
                     $inputEle.val($tr.text());
                     $autoComplete.hide();
                 }

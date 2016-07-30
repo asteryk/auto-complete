@@ -1,41 +1,51 @@
-$backgroundColor:#FFFFFF;
-$borderSize:1px;
-$borderColor:#cccccc;
-$selectColor:rgb(238, 238, 238);
-$selectFontColor:rgb(51, 122, 183);
-$inputLeftPadding:12px;
+$autoCompleteBackgroundColor:#FFFFFF;
+$autoCompleteFontColor:#000000;
+$autoCompleteBoxShadow:0 6px 12px rgba(0, 0, 0, .175);
+// 主体样式
+$autoCompleteBorder:1px soild #cccccc;
+// 主体边框样式
+$autoCompleteMaxHeight:220px;
+// 出现滚动条的最大高度
+$autoCompleteSelectColor:rgb(238, 238, 238);
+$autoCompleteSelectFontColor:rgb(51, 122, 183);
+// 选中样式
+$autoCompleteTablePadding:5px;
+// 显示下拉框样式
+$autoCompleteLineHeight:20px;
+$autoCompleteRowPadding:3px 12px;
+// 单行样式
 .js-autocomplete-area {
     display: none;
-    background-color: $backgroundColor;
-    color: #000000;
-    border: $borderSize solid $borderColor;
-    border-radius: 4px;
+    background-color: $autoCompleteBackgroundColor;
+    color: $autoCompleteFontColor;
+    border: $autoCompleteBorder;
+    border-radius: $autoCompleteBorderRadius;
     position: absolute;
     z-index: 9999;
-    max-height: 220px;
+    max-height: $autoCompleteMaxHeight;
     overflow-x: hidden;
     overflow-y: auto;
     text-align: left;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: $autoCompleteBoxShadow;
 }
 
 .js-autotable {
     border-collapse: collapse;
     border-spacing: 0;
-    background: none repeat scroll 0 0 $backgroundColor;
+    background: $autoCompleteBackgroundColor;
     width: 100%;
     cursor: default;
-    padding: 5px 0;
+    padding: $autoCompleteTablePadding;
 }
 
 .js-autorow {
-    background: none repeat scroll 0 0 $backgroundColor;
-    line-height: 20px;
-    padding: 3px $inputLeftPadding;
+    background: $autoCompleteBackgroundColor;
+    line-height: $autoCompleteLineHeight;
+    padding: $autoCompleteRowPadding;
     white-space: nowrap;
 }
 
 .js-autocomplete-selected {
-    background: none repeat scroll 0 0 $selectColor;
-    color: $selectFontColor;
+    background: $autoCompleteSelectColor;
+    color: $autoCompleteSelectFontColor;
 }

@@ -2,7 +2,7 @@
   display: none;
   background-color: #FFFFFF;
   color: #000000;
-  border: 1px solid #cccccc;
+  border: 1px soild #cccccc;
   border-radius: 4px;
   position: absolute;
   z-index: 9999;
@@ -15,17 +15,17 @@
 .js-autotable {
   border-collapse: collapse;
   border-spacing: 0;
-  background: none repeat scroll 0 0 #FFFFFF;
+  background: #FFFFFF;
   width: 100%;
   cursor: default;
   padding: 5px 0; }
 
 .js-autorow {
-  background: none repeat scroll 0 0 #FFFFFF;
+  background: #FFFFFF;
   line-height: 20px;
   padding: 3px 12px;
   white-space: nowrap; }
 
 .js-autocomplete-selected {
-  background: none repeat scroll 0 0 #eeeeee;
+  background: #eeeeee;
   color: #337ab7; }
