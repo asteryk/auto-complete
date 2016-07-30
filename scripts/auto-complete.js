@@ -51,8 +51,8 @@
     }
     // 回调
     function callbackStack(config, item) {
-        var callbakFunc = config.callback;
-        callbakFunc(item);
+        console.log(config);
+        config.callback(item);
     }
     // 显示下拉补全
     function resultShow(data, $autoComplete, config) {
@@ -88,7 +88,7 @@
 
     }
     // 功能键作用
-    function functionKeyUse($inputEle, inputText, $autoComplete) {
+    function functionKeyUse($inputEle, inputText, $autoComplete, config) {
         if ($autoComplete.is(':hidden')) return;
 
         switch (event.keyCode) {
@@ -135,7 +135,7 @@
                     'hisKey': $choose.attr('item-key'),
                     'hisVal': $choose.text()
                 }
-                callbackStack($choose);
+                callbackStack(config, item);
             case 27: //ESC键隐藏下拉框
                 $autoComplete.hide();
                 break;
@@ -158,7 +158,7 @@
                 // url优先于data
                 keyname: 'key',
                 valuename: 'value',
-                callback: function(res) {}
+                callback: function() {}
             };
             $.extend(config, params);
 
@@ -198,7 +198,7 @@
                     }
                 }
                 if (isFunctionalKey) {
-                    functionKeyUse($inputEle, currentInput, $autoComplete);
+                    functionKeyUse($inputEle, currentInput, $autoComplete, config);
                 }
 
             })
