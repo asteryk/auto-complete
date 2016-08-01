@@ -2,7 +2,9 @@
  * 自动补全输入
  * 2016/7/29
  * author:asteryk
- * @param       
+ * @param 
+ * autocomplete:BOOLEN,
+ 	可选,是否开启鼠标移动方向键移动自动补全
  * url: STRING,
 	可选,ajax的url地址
  * data: OBJECT,
@@ -67,11 +69,19 @@
     // 回调
     function callbackConstruct(config, $autoComplete) {
         var $choose = $autoComplete.find('.js-autocomplete-selected');
+        if ($choose.length <= 0) return;
         var item = {
             'key': $choose.attr('item-key'),
             'value': $choose.text()
         }
         config.callback(item);
+        $autoComplete.hide();
+    }
+    // 自动补全
+    function autoCompleteContent($inputEle, content, flag) {
+        if (flag) {
+            $inputEle.val(content);
+        }
     }
     /*
        页面DOM方法  
@@ -127,7 +137,7 @@
 
                 if ($next.length > 0) { //有下一行时（不是最后一行）
                     $next.addClass("js-autocomplete-selected"); //选中的行加背景
-                    $inputEle.val($next.text()); //选中行内容设置到输入框中
+                    autoCompleteContent($inputEle, $next.text(), config.autocomplete); //选中行内容设置到输入框中
                     scrollHeight($autoComplete, $inputEle, $next, 'down');
                 } else {
                     $inputEle.val(inputText); //输入框显示用户原始输入的值
@@ -145,13 +155,15 @@
 
                 if ($previous.length > 0) { //有上一行时（不是第一行）
                     $previous.addClass("js-autocomplete-selected"); //选中的行加背景
-                    $inputEle.val($previous.text()); //选中行内容设置到输入框中
+                    autoCompleteContent($inputEle, $previous.text(), config.autocomplete); //选中行内容设置到输入框中
                     scrollHeight($autoComplete, $inputEle, $previous, 'up');
                 } else {
                     $inputEle.val(inputText); //输入框显示用户原始输入的值
                 }
                 break;
             case 13: //回车隐藏下拉框
+                var $choose = $autoComplete.find('.js-autocomplete-selected');
+                autoCompleteContent($inputEle, $choose.text(), !config.autocomplete); //选中行内容设置到输入框中
                 callbackConstruct(config, $autoComplete);
             case 27: //ESC键隐藏下拉框
                 $autoComplete.hide();
@@ -168,6 +180,8 @@
             var inputLeft = $inputEle.offset().left;
             // 配置参数
             var config = {
+                autocomplete: true,
+                // 可选，是否开启鼠标移动方向键移动自动补全
                 url: null,
                 // 可选,ajax的method
                 data: null,
@@ -229,23 +243,31 @@
                 } else {
                     $inputEle.focus();
                     $('.js-autorow').removeClass('js-autocomplete-selected');
-                    $autoCompleteRow = $(this)
+                    $autoCompleteRow = $(this);
+                    autoCompleteContent($inputEle, $autoCompleteRow.text(), config.autocomplete);
                     $autoCompleteRow.addClass('js-autocomplete-selected');
                 }
 
 
             });
-            $autoComplete.on('click', '.js-autorow', function() {
-                if (isFunctionalKey) {
-                    isFunctionalKey = false;
-                } else {
-                    $autoCompleteRow = $(this);
-                    $inputEle.val($autoCompleteRow.text());
+            // 点击事件，排除输入框，在空白处点击可以选中
+            $(document).on('mousedown.autocomplete', function(event) {
+                if (!$autoComplete.is(':hidden') && event.target.tagName != 'INPUT') {
+                    $autoCompleteRow = $(this).find('.js-autocomplete-selected');
+                    autoCompleteContent($inputEle, $autoCompleteRow.text(), !config.autocomplete);
                     callbackConstruct(config, $autoComplete);
-                    $autoComplete.hide();
                 }
             });
+            // 销毁函数
+            $inputEle.destory = function() {
+                $(document).off('mousedown.autocomplete');
+                $autoComplete.off('mouseover');
+                $inputEle.off('input propertychange keyup');
+                $inputEle.remove();
+                $autoComplete.remove();
+            };
         }
+
     });
 
 })(jQuery || $);
