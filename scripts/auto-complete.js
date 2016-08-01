@@ -3,15 +3,30 @@
  * 2016/7/29
  * author:asteryk
  * @param       
- * url: null,
- * 可选,ajax的url地址
- * ajaxMethod: 'GET',
- * 可选,ajax的method,默认GET
- * data: null
- * 穿参格式[{'id':'1',name:'sweetyx'},{'id':'2',name:'lyk'}]
- * url优先于data
+ * url: STRING,
+	可选,ajax的url地址
+ * data: OBJECT,
+    穿参格式[{
+                key: "1",
+                val: "overwatchmaster"
+            }, {
+                key: "2",
+                val: "overwatch wiki"
+            }]
+    url优先于data
+ * keyname: STRING,
+    传参的第一个参数的keyname
+ * valuename: STRING,
+    传参的第二个参数keyname
+ * callback: FUNCTION
+    回调函数，返回选中的对象
+    格式{key:,value:}
  */
 (function($) {
+    /*
+        数据处理方法  
+    */
+    // 数据来源分类
     function filterData(currentInput, config, $autoComplete) {
         var defer = $.Deferred();
         if (config.url) {
@@ -50,10 +65,17 @@
         return list;
     }
     // 回调
-    function callbackStack(config, item) {
-        console.log(config);
+    function callbackConstruct(config, $autoComplete) {
+        var $choose = $autoComplete.find('.js-autocomplete-selected');
+        var item = {
+            'key': $choose.attr('item-key'),
+            'value': $choose.text()
+        }
         config.callback(item);
     }
+    /*
+       页面DOM方法  
+    */
     // 显示下拉补全
     function resultShow(data, $autoComplete, config) {
         // [data]'s type array
@@ -119,7 +141,7 @@
                 } else {
                     $previous = $previous.prev();
                 }
-                $('div.js-autorow').removeClass('js-autocomplete-selected');
+                $('.js-autorow').removeClass('js-autocomplete-selected');
 
                 if ($previous.length > 0) { //有上一行时（不是第一行）
                     $previous.addClass("js-autocomplete-selected"); //选中的行加背景
@@ -130,12 +152,7 @@
                 }
                 break;
             case 13: //回车隐藏下拉框
-                var $choose = $autoComplete.find('.js-autocomplete-selected');
-                var item = {
-                    'hisKey': $choose.attr('item-key'),
-                    'hisVal': $choose.text()
-                }
-                callbackStack(config, item);
+                callbackConstruct(config, $autoComplete);
             case 27: //ESC键隐藏下拉框
                 $autoComplete.hide();
                 break;
@@ -154,11 +171,14 @@
                 url: null,
                 // 可选,ajax的method
                 data: null,
-                // 穿参格式[{'163':['111222','1111333']},{'mail':['222222','222333']}]
+                // 穿参格式[
+                //     { "key": "1", "word": "守望先锋" },
+                //     { "key": "2", "word": "守望先锋配置" }
+                // ]
                 // url优先于data
                 keyname: 'key',
                 valuename: 'value',
-                callback: function() {}
+                callback: null
             };
             $.extend(config, params);
 
@@ -180,7 +200,6 @@
                 $autoComplete.hide();
                 filterData(currentInput, config, $autoComplete).then(function(list) {
                     resultShow(list, $autoComplete, config);
-                    console.log(list);
                 }, function(params) {
                     console.log(params);
                 });
@@ -204,24 +223,25 @@
             })
 
             // 鼠标事件
-            $autoComplete.on('mouseover', 'div.js-autorow', function() {
+            $autoComplete.on('mouseover', '.js-autorow', function() {
                 if (isFunctionalKey) {
                     isFunctionalKey = false;
                 } else {
                     $inputEle.focus();
-                    $('div').removeClass('js-autocomplete-selected');
+                    $('.js-autorow').removeClass('js-autocomplete-selected');
                     $autoCompleteRow = $(this)
                     $autoCompleteRow.addClass('js-autocomplete-selected');
                 }
 
 
             });
-            $autoComplete.on('click', 'div.js-autorow', function() {
+            $autoComplete.on('click', '.js-autorow', function() {
                 if (isFunctionalKey) {
                     isFunctionalKey = false;
                 } else {
                     $autoCompleteRow = $(this);
                     $inputEle.val($autoCompleteRow.text());
+                    callbackConstruct(config, $autoComplete);
                     $autoComplete.hide();
                 }
             });
