@@ -18,20 +18,11 @@ var gulp = require('gulp'),
     // JS语法检查
     jshint = require('gulp-jshint'),
     // 让gulp任务，可以相互独立，解除任务间的依赖，增强task复用
-    runSequence = require('run-sequence');
+    runSequence = require('run-sequence'),
+    // open browser
+    open = require('gulp-open');
 // dev server
-//自动刷新 
-var livereload = require('gulp-livereload'),
-    // express应用
-    express = require('express'),
-    // bodyParser基于express用于解析客户端请求的body中的内容,内部使用JSON编码处理,url编码处理以及对于文件的上传处理.
-    body = require('body-parser'),
-    // 用于打开URL
-    openurl = require('openurl'),
-    // Tiny LiveReload server，需要bodyParser
-    tinylr = require('tiny-lr'),
-    // 跑一个服务器
-    server = tinylr();
+var browserSync = require('browser-sync').create();
 
 var config = require('./shark-deploy-conf.json');
 
@@ -46,57 +37,6 @@ var cssPath = appConfig.cssPath;
 var jsPath = appConfig.jsPath;
 var htmlPath = appConfig.htmlPath;
 var scssPath = appConfig.scssPath;
-// functions
-/**
- * 插入livereload.js到html中
- *
- * @param  {string} html 需要处理的内容
- * @return {string}      处理后的结果
- */
-function injectHtml(html) {
-    var index = html.lastIndexOf('</body>');
-    if (index !== -1) {
-        var script1 = '';
-        var script2 = '\n<script>document.write(\'<script src="http://\' + (location.host || \'localhost\').split(\':\')[0] + \':' + appConfig.port + '/livereload.js?snipver=1"></\' + \'script>\')</script>\n';
-        return html.substr(0, index) + script1 + script2 + html.substr(index);
-    } else {
-        return html;
-    }
-}
-
-function headerStatic(staticPath, headers) {
-    return function(req, res, next) {
-        var reqPath = req.path === '/' ? '/index' : req.path;
-        var f = path.join(staticPath, reqPath);
-
-        if (fs.existsSync(f)) {
-            if (headers) {
-                for (var h in headers) {
-                    res.set(h, headers[h]);
-                }
-            }
-            // 处理html格式
-            if (/\.html$/.test(reqPath)) {
-                res.set('Content-Type', 'text/html');
-                // 文本文件
-                res.send(injectHtml(fs.readFileSync(f, 'UTF-8')));
-            } else {
-                if (/\.js$/.test(reqPath)) {
-                    res.set('Content-Type', 'text/javascript');
-                    res.send(fs.readFileSync(f, 'UTF-8'));
-                } else if (/\.css$/.test(reqPath)) {
-                    res.set('Content-Type', 'text/css');
-                    res.send(fs.readFileSync(f, 'UTF-8'));
-                } else {
-                    res.send(fs.readFileSync(f));
-                }
-            }
-        } else {
-            if (reqPath !== '/livereload.js') {}
-            next();
-        }
-    }
-}
 // gulp开始
 
 //清理build和临时目录
@@ -175,41 +115,29 @@ gulp.task('build', function() {
         'uglifyjs'
     );
 });
-
-//Server
-gulp.task('serve', function() {
-    var app = express();
-    // js
-    app.use(jsPath, headerStatic(path.join(webappDir, jsPath), {}));
-    // css
-    app.use(cssPath, headerStatic(path.join(webappDir, cssPath), {}));
-    // html
-    app.use(appConfig.contextPath, headerStatic(webappDir, {}));
-
-    // livereload middleware
-    app.use(body()).use(tinylr.middleware({
-        app: app
-    }));
-
-    app.listen(appConfig.port, function(err) {
-        if (err) {
-            return console.log(err);
-        }
-        // 设置了默认打开页面
-        if (appConfig.openurl) {
-            openurl.open(appConfig.openurl);
-        }
-        console.log('listening on %d', appConfig.port);
+// open browser
+gulp.task('open-url', function() {
+    gulp.src(webappDir)
+        .pipe(open({ uri: appConfig.openurl }));
+});
+// 
+gulp.task('browser-sync', function() {
+    // .init starts the server
+    browserSync.init({
+        server: webappDir,
+        port: appConfig.port
     });
     gulp.watch(path.join(webappDir, scssPath, '**/*.scss'), ['sass:compile']);
-
-    function watchFiles(ext) {
-        gulp.watch(path.join(webappDir, '**/*.' + ext), function(event) {
-            tinylr.changed(event.path);
-        });
-    }
-    watchFiles('js');
-    watchFiles('css');
-    watchFiles('html');
+    gulp.watch(path.join(webappDir, jsPath, '**/*.js'));
+    gulp.watch(path.join(webappDir, htmlPath, '**/*.{html,htm}'));
+    gulp.watch(path.join(webappDir, cssPath, '**/*.css'));
+});
+//Server
+gulp.task('serve', function() {
+    runSequence(
+        'sass:compile',
+        'browser-sync',
+        'open-url'
+    );
 });
 gulp.task('default', ['build']);
